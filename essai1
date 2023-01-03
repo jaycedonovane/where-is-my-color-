@@ -1,0 +1,66 @@
+import tkinter as tk
+import colorsys
+import math
+
+CANVAS_WIDTH = 700
+CANVAS_HEIGHT = 700
+RECTANGLE_SIZE = 60
+
+entries = []
+buttons = []
+labels = []
+
+def show_color(index):
+    color_code = entries[index].get()
+    r, g, b = int(color_code[:2], 16), int(color_code[2:4], 16), int(color_code[4:], 16)
+    color = "#%02x%02x%02x" % (r, g, b)
+    h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+    angle = int(360 * h)
+    max_radius = min(CANVAS_WIDTH, CANVAS_HEIGHT) // 2 - RECTANGLE_SIZE // 2
+    x = center_x + max_radius * math.cos(math.radians(angle)) - RECTANGLE_SIZE // 2
+    y = center_y + max_radius * math.sin(math.radians(angle)) - RECTANGLE_SIZE // 2
+    canvas.create_rectangle(x, y, x + RECTANGLE_SIZE, y + RECTANGLE_SIZE, fill=color, outline=color)
+    canvas.create_line(center_x, center_y, x + RECTANGLE_SIZE // 2, y + RECTANGLE_SIZE // 2, fill="black")
+    x1 = center_x
+    y1 = center_y
+    x2 = x + RECTANGLE_SIZE // 2
+    y2 = y + RECTANGLE_SIZE // 2
+    x_mid = (x1 + x2) // 2
+    y_mid = (y1 + y2) // 2
+    labels.append(tk.Label(canvas, text=str(index + 1)))
+    labels[index].place(x=x_mid, y=y_mid)
+
+def show_chromatic_wheel():
+    button.pack_forget()
+    for i in range(5):
+        entries.append(tk.Entry(canvas, width=10))
+        entries[i].place(x=CANVAS_WIDTH // 2 - 50, y=CANVAS_HEIGHT // 2 - 180 + 40*i)
+        buttons.append(tk.Button(canvas, text="Show me where the color is", command=lambda i=i: show_color(i)))
+        buttons[i].place(x=CANVAS_WIDTH // 2 + 50, y=CANVAS_HEIGHT // 2 - 180 + 40*i)
+    canvas.pack()
+    root.geometry(f"{CANVAS_WIDTH}x{CANVAS_HEIGHT}")
+    canvas.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    max_radius = min(CANVAS_WIDTH, CANVAS_HEIGHT) // 2 - RECTANGLE_SIZE // 2
+    blue_hue= 240 / 360
+    for angle in range(360):
+        hue = angle / 360
+        saturation = 1.0
+        lightness = 0.5
+        r, g, b = colorsys.hls_to_rgb(hue, lightness, saturation)
+        color = "#%02x%02x%02x" % (int(r * 255), int(g * 255), int(b * 255))
+        x = center_x + max_radius * math.cos(math.radians(angle)) - RECTANGLE_SIZE // 2
+        y = center_y + max_radius * math.sin(math.radians(angle)) - RECTANGLE_SIZE // 2
+        canvas.create_rectangle(x, y, x + RECTANGLE_SIZE, y + RECTANGLE_SIZE, fill=color, outline=color)
+
+root = tk.Tk()
+root.title("Chromatic Wheel")
+
+canvas = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
+center_x = CANVAS_WIDTH // 2
+center_y = CANVAS_HEIGHT // 2
+
+button = tk.Button(root, text="Chromatic Wheel", command=show_chromatic_wheel)
+button.pack()
+
+root.mainloop()
+
